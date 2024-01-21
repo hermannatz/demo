@@ -4,27 +4,25 @@
 
 require 'functions.php';
 
-$uri = parse_url($_SERVER['REQUEST_URI'])['path'];
+#require 'router.php';
 
-$routes = [
-	'/' => 'controllers/index.php',
-	'/about' => 'controllers/about.php',
-	'/contact' => 'controllers/contact.php'
-];
+# Connect to MySQL Database
+$dsn = "mysql:host=localhost;port=3306;dbname=myapp;charset=utf8mb4";
 
-function routeToControl($uri, $routes)
-{
-	if( array_key_exists($uri, $routes)){
-		require $routes[$uri];
-	} else {
-		abort();
-	}
+# We need to handle the situation where the connection fails. For that a try catch block is used.
+$pdo = new PDO($dsn, 'root', '');
 
+# the preapare methods allows us to prepare an SQL statetement that will be executed later.
+
+$statement = $pdo->prepare("select * from posts");
+
+$statement->execute();
+
+# I want the result as an associative array. The fetchAll method returns an array containing all result set rows.
+$posts = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+foreach( $posts as $post){
+	echo "<li>{$post['title']}</li>";
 }
 
-function abort( $code = 404 ) {
-	http_response_code( $code );
-	require( "views/{$code}.view.php");
-}
-
-routeToControl($uri, $routes);
+#dd($posts);
